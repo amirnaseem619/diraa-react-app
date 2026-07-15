@@ -1,0 +1,32 @@
+import { useEffect, useRef, useState } from "react";
+
+export default function Reveal({ as: Tag = "div", className = "", children, ...rest }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Tag ref={ref} className={`${className}${visible ? " show" : ""}`} {...rest}>
+      {children}
+    </Tag>
+  );
+}
